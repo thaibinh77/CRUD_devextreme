@@ -1,0 +1,52 @@
+﻿@using DevExtremeMvc.Models
+
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@(Html.DevExtreme().DataGrid<DevExtremeMvc.Models.CustomerModel>()
+    .DataSource(d => d.WebApi()
+        .Controller("CustomerData")  // Tên controller
+        .LoadAction("GetAllCustomers")  // Action để tải dữ liệu
+        .InsertAction("InsertCustomer")  // Action để thêm mới
+        .UpdateAction("UpdateCustomer")  // Action để chỉnh sửa
+        .DeleteAction("DeleteCustomer")  // Action để xóa
+        .Key("customerId")  // Khóa chính
+    )
+    .RemoteOperations(true)
+    .Columns(columns => {
+        columns.AddFor(m => m.customerId).Visible(false);  // Ẩn cột ID nếu không cần thiết
+        columns.AddFor(m => m.fullName).Caption("Full Name");
+        columns.AddFor(m => m.email).Caption("Email");
+        columns.AddFor(m => m.password).Caption("Password");
+        columns.AddFor(m => m.dateOfBirth).Caption("Date of Birth").DataType(GridColumnDataType.Date);
+
+        // Thêm cột chứa các nút "Edit" và "Delete"
+        columns.Add()
+            .Type(GridCommandColumnType.Buttons)
+            .Buttons(buttons => {
+                buttons.Add().Name("edit").Icon("edit").Hint("Edit").CssClass("dx-icon-edit");
+                buttons.Add().Name("delete").Icon("trash").Hint("Delete").CssClass("dx-icon-trash");
+            });
+    })
+    .Editing(e => e
+        .Mode(GridEditMode.Row)  // Hiển thị form chỉnh sửa trong dòng
+        .AllowAdding(true)  // Cho phép thêm mới
+        .AllowDeleting(true)  // Cho phép xóa
+        .AllowUpdating(true)  // Cho phép chỉnh sửa
+    )
+    .FilterRow(f => f.Visible(true))
+    .HeaderFilter(f => f.Visible(true))
+    .GroupPanel(p => p.Visible(true))
+    .Paging(p => p.PageSize(10))
+    .Summary(s => s
+        .TotalItems(totalItems => {
+            totalItems.AddFor(m => m.email).SummaryType(SummaryType.Count);
+        })
+        .GroupItems(groupItems => {
+            groupItems.Add().SummaryType(SummaryType.Count);
+        })
+    )
+    .ShowBorders(true)
+)

@@ -1,0 +1,72 @@
+﻿@model DevExtremeMvc.Models.ProductModel
+
+@{
+    ViewBag.Title = "Update";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>Update Product</h2>
+
+@using (Html.BeginForm("Update", "Product", FormMethod.Post, new { @enctype = "multipart/form-data" }))
+{
+    @Html.AntiForgeryToken()
+
+    <div class="dx-fieldset">
+        <div class="dx-field">
+            <h2>@TempData["ErrorMessage"]</h2>
+
+            @Html.HiddenFor(model => model.productId)
+
+            <div class="dx-field-label">Name</div>
+            <div class="dx-field-value">
+                @(Html.DevExtreme().TextBoxFor(m => m.productName) // Assuming 'ProductName' is the correct property
+                            .Placeholder("Enter full name here...")
+                            .InputAttr(new { @aria_label = "Full Name" }) // Corrected InputAttr
+                        )
+            </div>
+        </div>
+
+        @Html.HiddenFor(model => model.imgLink)
+
+        <div class="dx-field">
+            <div class="dx-field-label">Image</div>
+            <div class="dx-field-value">
+                <img src="@Model.imgLink" alt="Picture of @Model.productName" style="width: 100px; height: 100px" /> (Current Image)
+
+                @(Html.DevExtreme().FileUploader()
+                    .Name("image")
+                    .SelectButtonText("Select photo")
+                    .LabelText("")
+                    .Accept("image/*")
+                    .UploadMode(FileUploadMode.UseForm)
+                    .InputAttr("aria-label", "Select Photo")
+                )
+            </div>
+        </div>
+
+        <div class="dx-field">
+            <div class="dx-field-label">Product Description</div>
+            <div class="dx-field-value">
+                @(Html.DevExtreme().TextBoxFor(m => m.productDescription) // Assuming 'ProductName' is the correct property
+                    .Placeholder("Enter product description here...")
+                    .InputAttr(new { @aria_label = "Product Description" }) // Corrected InputAttr
+                )
+            </div>
+        </div>
+        <div class="dx-field">
+            <div class="dx-field-label">Product Price</div>
+            <div class="dx-field-value">
+                @(Html.DevExtreme().TextBoxFor(m => m.price) // Assuming 'ProductName' is the correct property
+                    .Placeholder("Enter product price here...")
+                    .InputAttr(new { @aria_label = "Product Price" }) // Corrected InputAttr
+                )
+            </div>
+        </div>
+
+        @(Html.DevExtreme().Button()
+                    .Text("Submit")
+                    .Type(ButtonType.Success) // Button styling
+                    .UseSubmitBehavior(true) // Ensure the button submits the form
+                )
+    </div>
+}

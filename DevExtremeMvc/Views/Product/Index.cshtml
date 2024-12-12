@@ -1,0 +1,120 @@
+﻿@model List<DevExtremeMvc.Models.ProductModel>
+
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+@(Html.DevExtreme().DataGrid<DevExtremeMvc.Models.ProductModel>()
+    .ID("grid")
+    .DataSource(d => d.WebApi()
+        .Controller("ProductData")  // Tên controller
+        .LoadAction("GetAllProducts")  // Action để tải dữ liệu
+        .InsertAction("InsertProduct")  // Action để thêm mới
+        .UpdateAction("UpdateProduct")  // Action để chỉnh sửa
+        .DeleteAction("DeleteProduct")  // Action để xóa
+        .Key("productId")  // Khóa chính
+    )
+    .Selection(s => s.Mode(SelectionMode.Single))
+    .Paging(paging => paging.Enabled(false))
+    .Editing(e => e.Mode(GridEditMode.Popup)
+        .Popup(p => p
+            .Width(600)
+            .Height(400)
+            .Position(pos => pos
+                .My(HorizontalAlignment.Center, VerticalAlignment.Center)
+                .At(HorizontalAlignment.Center, VerticalAlignment.Center)
+                .Of("#grid")
+            )
+        )
+        .Texts(t => t
+            .ConfirmDeleteMessage("")
+        )
+    )
+    .ShowBorders(true)
+    .Columns(columns => {
+        columns.AddFor(m => m.productName).Caption("Product Name");
+        columns.AddFor(m => m.imgLink).Caption("Image Link");
+        columns.AddFor(m => m.imgLink)
+            .Caption("Image Link")
+            .CellTemplate(@<text>
+                <div>
+                    <img src="<%- value %>" alt="Picture of <%- data.productName %>" style="width: 100px; height: 100px"/>
+                </div>
+            </text>);
+        columns.AddFor(m => m.productDescription).Caption("Description");
+        columns.AddFor(m => m.price).Caption("Price");
+    })
+    .OnSelectionChanged("selectionChanged")
+)
+@(Html.DevExtreme().SpeedDialAction()
+    .ID("action-add")
+    .Icon("add")
+    .Label("Add row")
+    .Index(1)
+    .OnClick("addRow")
+)
+@(Html.DevExtreme().SpeedDialAction()
+    .ID("action-remove")
+    .Icon("trash")
+    .Visible(false)
+    .Label("Delete row")
+    .Index(2)
+    .OnClick("deleteRow")
+)
+@(Html.DevExtreme().SpeedDialAction()
+    .ID("action-edit")
+    .Icon("edit")
+    .Visible(false)
+    .Label("Edit row")
+    .Index(3)
+    .OnClick("editRow")
+)
+<div id="action-remove"></div>
+<div id="action-edit"></div>
+
+<script>
+    var selectedRowData = null; // Initialize selectedRowData
+
+    var selectionChanged = function (e) {
+        selectedRowData = e.component.getSelectedRowsData()[0]; // Get selected row data
+
+        $("#action-remove").dxSpeedDialAction("instance").option("visible", selectedRowData !== null);
+        $("#action-edit").dxSpeedDialAction("instance").option("visible", selectedRowData !== null);
+    }
+
+    var getGridInstance = function () {
+        return $("#grid").dxDataGrid("instance");
+    }
+
+    var addRow = function () {
+        window.location.href = '@Url.Action("Insert", "Product")';
+    }
+
+    var deleteRow = function () {
+        //if (selectedRowData) {
+        //    $("#popup").dxPopup("show");
+        //}
+
+        if (selectedRowData) {
+            window.location.href = '@Url.Action("Delete", "Product", new { productId = "__PRODUCT_ID__" })'.replace("__PRODUCT_ID__", selectedRowData.productId);
+        }
+    }
+
+    //function hidePopup() {
+    //    $("#popup").dxPopup("hide");
+    //}
+
+    //function confirmDelete() {
+    //    $("#popup").dxPopup("hide");
+    //    getGridInstance().refresh();
+    //}
+
+    var editRow = function () {
+        if (selectedRowData) {
+            window.location.href = '@Url.Action("Update", "Product", new { productId = "__PRODUCT_ID__" })'.replace("__PRODUCT_ID__", selectedRowData.productId);
+        }
+    }
+</script>
+
